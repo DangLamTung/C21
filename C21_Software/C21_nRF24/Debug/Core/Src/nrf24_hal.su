@@ -1,0 +1,2 @@
+nrf24_hal.c:6:6:nRF24_GPIO_Init	8	static
+nrf24_hal.c:29:9:nRF24_LL_RW	32	static

@@ -1,0 +1,29 @@
+C21 possible theme:
+
++ Gamepad
+
+Objective: USB communication, fun to play gamepad, with remote control
+*Good point: already well established code base
+Component: Button, Led, Joystick
+           HC 05
+           (optional) Capacitive Touch
+           (optional) MPU9250
+           (optional) SPI TFT
+           (optional) SD card
+           (optional) Buzzer
+           (optional) Speaker
+
+
++ Smartwatch
+
+Objective: Layout a low power comsumption smartwatch
+Constrait: 3*3 or smaller board
+           High level of SMD soldering
+
+Component: Button, Led, Battery
+           (optional) Capacitive Touch
+           (optional) MPU9250
+           (optional) SPI TFT
+           (optional) SD card
+           (optional) Buzzer           
+           
