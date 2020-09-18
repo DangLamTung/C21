@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name C21_lib)(type KiCad)(uri ${KIPRJMOD}/C21_lib.pretty)(options "")(descr ""))
+  (lib (name C21_board)(type KiCad)(uri C:/Users/UAD81HC/Documents/GitHub/C21_hardware/C21_board.pretty)(options "")(descr ""))
+)
