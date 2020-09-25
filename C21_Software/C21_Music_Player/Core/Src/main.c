@@ -47,6 +47,9 @@ DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi2_tx;
 
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart2;
 
 PCD_HandleTypeDef hpcd_USB_FS;
@@ -63,6 +66,8 @@ static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_USB_PCD_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -76,7 +81,7 @@ FRESULT fres ;
 DWORD fre_clust ;
 uint32_t total , free ;
 char buffer [ 100 ] ;
-
+uint32_t counter = 0;
 
 /* USER CODE END 0 */
 
@@ -114,7 +119,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_SPI2_Init();
   MX_USB_PCD_Init();
+  MX_TIM2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
   fres = f_mount ( &fs ,  "" ,   1);
    while ( fres !=  FR_OK ){
  	  fres = f_mount ( &fs ,  "" ,   1);
@@ -177,40 +186,64 @@ int main(void)
 //   ST7735_Init();
 //   ST7735_FillScreen(0xFFE0);
    FIL file;
-   FRESULT res = f_open(&file, "video.rgb", FA_READ);
+   FRESULT res = f_open(&file, "trungthu.wav", FA_READ);
+   uint32_t bytesRead;
    if(res != FR_OK) {
  //      UART_Printf("f_open() failed, res = %d\r\n", res);
        return -1;
    }
- uint32_t imageHeight = 128;
- uint32_t imageWidth = 128;
- uint32_t bytesRead;
- uint16_t image[4096];
- for( int frame = 0;  frame < 903; frame ++){
-   uint8_t imageRow[256];
-      for(uint32_t y = 0; y < 32; y++) {
-          uint32_t rowIdx = 0;
-          res = f_read(&file, imageRow, sizeof(imageRow), &bytesRead);
-          if(res != FR_OK) {
- //             UART_Printf("f_read() failed, res = %d\r\n", res);
-              f_close(&file);
-              return -7;
-          }
 
-          for(uint32_t x = 0; x < imageWidth; x++) {
-              uint8_t h = imageRow[rowIdx++];
-              uint8_t l = imageRow[rowIdx++];
-
-              image[y*128 + x ] = (h<<8)|l;
-
- //             ST7735_DrawPixel(x,  y - 1 , (l<<8)|h);
-          }
+   uint8_t header[44];
+      res = f_read(&file, header, sizeof(header), &bytesRead);
+      if(res != FR_OK) {
+//          UART_Printf("f_read() failed, res = %d\r\n", res);
+          f_close(&file);
+          return -2;
       }
-
-//      ST7735_DrawImage(0, 0, 128, 32, &image);
- //
- //     ST7735_DrawPixel(x,  y - 1 , color565);
- }
+   uint32_t data_size = (uint32_t) (header[8]<<24) |( header[7]<<16) |( header[6]<<8)|(header[5]);
+   uint32_t sample_rate = (uint32_t) (header[27]<<24) |( header[26]<<16) |( header[25]<<8)|(header[24]);
+   uint32_t bit_rate = (uint32_t) (header[32]<<24) |( header[31]<<16) |( header[30]<<8)|(header[29]);
+// uint32_t imageHeight = 128;
+// uint32_t imageWidth = 128;
+//
+// uint16_t image[4096];
+// for( int frame = 0;  frame < 903; frame ++){
+//   uint8_t imageRow[256];
+//      for(uint32_t y = 0; y < 32; y++) {
+//          uint32_t rowIdx = 0;
+//          res = f_read(&file, imageRow, sizeof(imageRow), &bytesRead);
+//          if(res != FR_OK) {
+// //             UART_Printf("f_read() failed, res = %d\r\n", res);
+//              f_close(&file);
+//              return -7;
+//          }
+//
+//          for(uint32_t x = 0; x < imageWidth; x++) {
+//              uint8_t h = imageRow[rowIdx++];
+//              uint8_t l = imageRow[rowIdx++];
+//
+//              image[y*128 + x ] = (h<<8)|l;
+//
+// //             ST7735_DrawPixel(x,  y - 1 , (l<<8)|h);
+//          }
+//      }
+//
+////      ST7735_DrawImage(0, 0, 128, 32, &image);
+// //
+// //     ST7735_DrawPixel(x,  y - 1 , color565);
+// }
+   while(f_eof (&file) == 0){
+   int8_t data[2];
+   res = f_read(&file, data, sizeof(data), &bytesRead);
+         if(res != FR_OK) {
+   //          UART_Printf("f_read() failed, res = %d\r\n", res);
+             f_close(&file);
+             return -2;
+         }
+         uint16_t sound = data[0] << 8 | data[1];
+         uint16_t pwm = (uint16_t) sound/65536.0*1632;
+         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm);
+   }
       res = f_close(&file);
   /* USER CODE END 2 */
 
@@ -343,6 +376,111 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 71;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 1000;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1632;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
 
 }
 
