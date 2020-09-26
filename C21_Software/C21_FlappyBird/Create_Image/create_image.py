@@ -2,14 +2,14 @@
 
 import cv2
 
-img = cv2.imread("flappybird.png")
-img = cv2.resize(img,(15,15))
+img = cv2.imread("ground.jfif")
+img = cv2.resize(img,(128,128))
 cv2.imshow('BGR Image',img)
 img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 cv2.imshow('RGB Image',img_rgb )
 cv2.waitKey(0)
-f= open("image.h","w+")
-f.write("const uint16_t bird[][15] = {")
+f= open("back_ground.h","w+")
+f.write("const uint16_t ground[][128] = {")
 
 for y in range(0, img.shape[0]):
     s = "{"
