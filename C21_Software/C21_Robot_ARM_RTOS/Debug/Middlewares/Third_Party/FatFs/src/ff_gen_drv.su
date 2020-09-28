@@ -1,0 +1,14 @@
+main.h:83:13:MX_ADC1_Init	24	static
+main.h:152:13:MX_SPI1_Init	8	static
+main.h:190:13:MX_SPI2_Init	8	static
+main.h:228:13:MX_TIM1_Init	32	static
+main.h:274:13:MX_TIM2_Init	48	static
+main.h:327:13:MX_TIM3_Init	64	static
+main.h:398:13:MX_USART1_UART_Init	8	static
+main.h:429:13:MX_DMA_Init	16	static
+main.h:447:13:MX_GPIO_Init	40	static
+ff_gen_drv.c:68:9:FATFS_LinkDriverEx	32	static
+ff_gen_drv.c:97:9:FATFS_LinkDriver	16	static
+ff_gen_drv.c:109:9:FATFS_UnLinkDriverEx	24	static
+ff_gen_drv.c:135:9:FATFS_UnLinkDriver	16	static
+ff_gen_drv.c:145:9:FATFS_GetAttachedDriversNbr	4	static

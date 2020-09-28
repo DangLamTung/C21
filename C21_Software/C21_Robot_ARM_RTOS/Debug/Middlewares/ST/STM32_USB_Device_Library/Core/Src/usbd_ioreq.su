@@ -1,0 +1,16 @@
+main.h:83:13:MX_ADC1_Init	24	static
+main.h:152:13:MX_SPI1_Init	8	static
+main.h:190:13:MX_SPI2_Init	8	static
+main.h:228:13:MX_TIM1_Init	32	static
+main.h:274:13:MX_TIM2_Init	48	static
+main.h:327:13:MX_TIM3_Init	64	static
+main.h:398:13:MX_USART1_UART_Init	8	static
+main.h:429:13:MX_DMA_Init	16	static
+main.h:447:13:MX_GPIO_Init	40	static
+usbd_ioreq.c:87:20:USBD_CtlSendData	24	static
+usbd_ioreq.c:109:20:USBD_CtlContinueSendData	24	static
+usbd_ioreq.c:126:20:USBD_CtlPrepareRx	24	static
+usbd_ioreq.c:148:20:USBD_CtlContinueRx	24	static
+usbd_ioreq.c:162:20:USBD_CtlSendStatus	16	static
+usbd_ioreq.c:179:20:USBD_CtlReceiveStatus	16	static
+usbd_ioreq.c:197:10:USBD_GetRxCount	16	static

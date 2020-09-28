@@ -1,0 +1,15 @@
+main.h:83:13:MX_ADC1_Init	24	static
+main.h:152:13:MX_SPI1_Init	8	static
+main.h:190:13:MX_SPI2_Init	8	static
+main.h:228:13:MX_TIM1_Init	32	static
+main.h:274:13:MX_TIM2_Init	48	static
+main.h:327:13:MX_TIM3_Init	64	static
+main.h:398:13:MX_USART1_UART_Init	8	static
+main.h:429:13:MX_DMA_Init	16	static
+main.h:447:13:MX_GPIO_Init	40	static
+diskio.c:75:9:disk_status	24	static
+diskio.c:90:9:disk_initialize	24	static
+diskio.c:112:9:disk_read	40	static
+diskio.c:134:9:disk_write	40	static
+diskio.c:156:9:disk_ioctl	24	static
+diskio.c:174:14:get_fattime	4	static
