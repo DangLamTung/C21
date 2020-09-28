@@ -2,18 +2,19 @@
 
 import cv2
 
-img = cv2.imread("ground.jfif")
-img = cv2.resize(img,(128,128))
+img = cv2.imread("flappyover.png")
+img = cv2.resize(img,(128,33))
+img  = cv2.flip(img, 1)
 cv2.imshow('BGR Image',img)
 img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 cv2.imshow('RGB Image',img_rgb )
 cv2.waitKey(0)
-f= open("back_ground.h","w+")
-f.write("const uint16_t ground[][128] = {")
+f= open("gameover.h","w+")
+f.write("const uint16_t over[][128] = {")
 
-for y in range(0, img.shape[0]):
+for y in range(0, img.shape[1]):
     s = "{"
-    for x in range(0, img.shape[1]):
+    for x in range(0, img.shape[0]):
         (b, g, r) = img[x,y,:]
         color565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3)
         # for right endiness, so ST7735_DrawImage would work
