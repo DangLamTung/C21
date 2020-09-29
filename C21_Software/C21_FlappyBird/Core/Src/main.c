@@ -23,7 +23,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "back_ground.h"
+#include "bird.h"
+#include "gameover.h"
+#include "st7735.h"
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +53,7 @@ DMA_HandleTypeDef hdma_spi2_tx;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart2;
 
@@ -68,13 +73,30 @@ static void MX_SPI2_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+FATFS fs ;
+FATFS  * pfs ;
+FIL fil ;
+FRESULT fres ;
+DWORD fre_clust ;
+int i = 0;
 
+
+int  printRandoms(int lower, int upper)
+{
+        int num;
+        num = (rand() % (upper - lower + 1)) + lower;
+        return num;
+}
+//
+int col_array[3];
+int col_pos[3];
 /* USER CODE END 0 */
 
 /**
@@ -113,8 +135,101 @@ int main(void)
   MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  ST7735_Init();
 
+  ST7735_DrawImage(0, 0, 128, 128, &ground);
+  uint16_t buffer[15][15];
+  uint16_t buffer_col[300];
+
+  uint16_t buffer_down[10][78];
+  int j = 128;
+
+  fres = f_mount ( &fs ,  "" ,   1);
+   while ( fres !=  FR_OK ){
+ 	  fres = f_mount ( &fs ,  "" ,   1);
+ 	  HAL_Delay(100);
+   }
+  FIL file;
+      FRESULT res = f_open(&file, "rose.bmp", FA_READ);
+      if(res != FR_OK) {
+//          UART_Printf("f_open() failed, res = %d\r\n", res);
+          return -1;
+      }
+
+  unsigned int bytesRead;
+  uint8_t header[34];
+  res = f_read(&file, header, sizeof(header), &bytesRead);
+  if(res != FR_OK) {
+//      UART_Printf("f_read() failed, res = %d\r\n", res);
+//      f_close(&file);
+      return -2;
+  }
+
+//  if((header[0] != 137) || (header[1] != 80)) {
+////      UART_Printf("Wrong BMP signature: 0x%02X 0x%02X\r\n", header[0], header[1]);
+////      f_close(&file);
+//      return -3;
+//  }
+
+  uint32_t imageOffset = header[10] | (header[11] << 8) | (header[12] << 16) | (header[13] << 24);
+  uint32_t imageWidth = header[18] | (header[19] << 8) | (header[20] << 16) | (header[21] << 24);
+  uint32_t imageHeight = header[22] | (header[23] << 8) | (header[24] << 16) | (header[25] << 24);
+  uint16_t imagePlanes = header[26] | (header[27] << 8);
+  uint16_t imageBitsPerPixel = header[28] | (header[29] << 8);
+  uint32_t imageCompression = header[30] | (header[31] << 8) | (header[32] << 16) | (header[33] << 24);
+
+
+  if((imageWidth != ST7735_WIDTH) || (imageHeight != ST7735_HEIGHT)) {
+//      UART_Printf("Wrong BMP size, %dx%d expected\r\n", ST7735_WIDTH, ST7735_HEIGHT);
+//      f_close(&file);
+//      return -4;
+  }
+
+  if((imagePlanes != 1) || (imageBitsPerPixel != 24) || (imageCompression != 0)) {
+//      UART_Printf("Unsupported image format\r\n");
+//      f_close(&file);
+//      return -5;
+  }
+
+  res = f_lseek(&file, imageOffset);
+  if(res != FR_OK) {
+//      UART_Printf("f_lseek() failed, res = %d\r\n", res);
+//      f_close(&file);
+//      return -6;
+  }
+
+//  // row size is aligned to 4 bytes
+//  uint8_t imageRow[(ST7735_WIDTH * 3 + 3) & ~3];
+//  for(uint32_t y = 0; y < imageHeight; y++) {
+//      uint32_t rowIdx = 0;
+//      res = f_read(&file, imageRow, sizeof(imageRow), &bytesRead);
+//      if(res != FR_OK) {
+////          UART_Printf("f_read() failed, res = %d\r\n", res);
+//          f_close(&file);
+//          return -7;
+//      }
+//
+//      for(uint32_t x = 0; x < imageWidth; x++) {
+//          uint8_t b = imageRow[rowIdx++];
+//          uint8_t g = imageRow[rowIdx++];
+//          uint8_t r = imageRow[rowIdx++];
+//          uint16_t color565 = (((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3));
+//          ST7735_DrawPixel(x, imageHeight - y - 1, color565);
+//      }
+//  }
+
+  res = f_close(&file);
+  int col_height = 30;
+
+
+  col_array[0] = printRandoms(30, 100);
+  col_array[1] = printRandoms(30, 100);
+  col_pos[0] = 128;
+  col_pos[1] = 128;
+  col_pos[2] = 128;
+  uint8_t game_over = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -124,6 +239,156 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  while(!game_over){
+	   uint16_t * ptr;
+	   uint16_t * ptr1;
+	   uint16_t * ptr2;
+
+		  ptr = (uint16_t *) calloc(1280, sizeof(uint16_t));
+		  for(int a = 0; a < 10; a++){
+			  for(int b = 0; b < 128; b++){
+				  ptr[a*128 + b] = ground[col_pos[0] +a][b];
+			  }
+		  }
+
+
+		  ptr1 = (uint16_t *) calloc(1280, sizeof(uint16_t));
+				  for(int a = 0; a < 10; a++){
+					  for(int b = 0; b < 128; b++){
+						  ptr1[a*128 + b] = ground[col_pos[1] +a][b];
+					  }
+				  }
+
+				  ptr2 = (uint16_t *) calloc(1280, sizeof(uint16_t));
+				 		  for(int a = 0; a < 10; a++){
+				 			  for(int b = 0; b < 128; b++){
+				 				  ptr2[a*128 + b] = ground[col_pos[2] +a][b];
+				 			  }
+				 		  }
+//	  ptr1 = (uint16_t *) calloc(780, sizeof(uint16_t));
+
+	  for(int a = 0; a < 15; a++){
+		  for(int b = 0; b < 15; b++){
+			  buffer[a][b] = ground[a][b + i];
+		  }
+	  }
+//
+
+
+      if(i < 128){
+    	  i+=2;
+      }
+      else{
+    	  ST7735_DrawImage(50, 0, 33, 128, &over);
+    	  game_over = 1;
+      }
+
+
+
+
+      if(col_pos[0] > 0){
+    	  col_pos[0]--;
+
+      }
+      else{
+    	  j = 128;
+    	  col_height = printRandoms(0, 100);
+    	  col_pos[0] = 128;
+    	  col_array[0] = printRandoms(0, 100);
+      }
+      if(col_pos[1] < 0 ){
+    	  col_pos[1] = 128;
+    	  col_array[1] = printRandoms(0, 100);
+      }
+      else{
+    	  if(col_pos[1] != 128){
+     	     col_pos[1] --;
+    	  }
+    	  else{
+             if(col_pos[0] < 88){
+            	 col_pos[1] --;
+             }
+    	  }
+      }
+      if(col_pos[2] < 0){
+    	  col_pos[2] = 128;
+    	  col_array[2] = printRandoms(0, 100);
+      }
+      else{
+          	  if(col_pos[2] != 128){
+          		  col_pos[2] --;
+          	  }
+
+          	   else{
+          	      if(col_pos[1] < 88){
+          	         col_pos[2] --;
+          	           }
+          	    }
+            }
+      if(j > 0){
+    	  j--;
+      }
+      else{
+    	  j = 128;
+    	  col_height = printRandoms(0, 100);
+      }
+//      for(uint8_t check; check < 3; check ++){
+          if((col_pos[0] < 10) && (col_pos[10] > 0)){
+        	  if( (col_array[0] < i) || (col_array[0] - 20 > i )){
+        		  ST7735_DrawImage(0, 0, 128, 128, &ground);
+        	      ST7735_DrawImage(50, 0, 33, 128, &over);
+        	      game_over = 1;
+        	  }
+          }
+
+          if(col_pos[1] < 10){
+             	  if( (col_array[1] < i) || (col_array[1] - 20 > i )){
+             		 ST7735_DrawImage(0, 0, 128, 128, &ground);
+             	     ST7735_DrawImage(50, 0, 33, 128, &over);
+             	    game_over = 1;
+             	  }
+               }
+
+          if(col_pos[2] < 10){
+             	  if( (col_array[2] < i) || (col_array[2] - 20 > i )){
+             		 ST7735_DrawImage(0, 0, 128, 128, &ground);
+             	     ST7735_DrawImage(50, 0, 33, 128, &over);
+             	    game_over = 1;
+             	  }
+               }
+//      }
+
+	  ST7735_DrawImage(i, 0, 15, 15, &bird);
+
+	  ST7735_FillRectangle(0, col_pos[0], col_array[0] , 10, ST7735_GREEN);
+	  ST7735_FillRectangle(col_array[0] + 20,col_pos[0], 88 - col_array[0] , 10, ST7735_GREEN);
+
+
+	  if(col_pos[1] < 128){
+		  ST7735_FillRectangle(0, col_pos[1], col_array[1] , 10, ST7735_GREEN);
+		  ST7735_FillRectangle(col_array[1] + 20,col_pos[1], 88 - col_array[1] , 10, ST7735_GREEN);
+	  }
+
+	  if(col_pos[2] < 128){
+	 		  ST7735_FillRectangle(0, col_pos[2], col_array[2] , 10, ST7735_GREEN);
+	 		  ST7735_FillRectangle(col_array[2] + 20,col_pos[2], 88 - col_array[2] , 10, ST7735_GREEN);
+	 	  }
+
+//	  ST7735_FillRectangle(0, j, col_height , 10, ST7735_GREEN);
+//	  ST7735_FillRectangle(col_height + 20, j, 88 - col_height , 10, ST7735_GREEN);
+
+	  HAL_Delay(100);
+	  ST7735_DrawImage(i, 0, 15, 15, &buffer);
+	  ST7735_DrawImage(0, col_pos[0], 128, 10, ptr);
+	  ST7735_DrawImage(0, col_pos[1], 128, 10, ptr1);
+	  ST7735_DrawImage(0, col_pos[2], 128, 10, ptr2);
+
+//	  ST7735_DrawImage(50, j, 78, 10, ptr1);
+	  free(ptr);
+	  free(ptr1);
+	  free(ptr2);
+	  }
+
   }
   /* USER CODE END 3 */
 }
@@ -355,6 +620,51 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 71;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 2000;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -450,6 +760,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -459,6 +770,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PC13 PC14 PC15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB1 PB10 SD_CS_Pin */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_10|SD_CS_Pin;
@@ -473,6 +790,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

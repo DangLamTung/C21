@@ -32,7 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+uint8_t pin_selected = 0;
+extern int i;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,7 +53,17 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+volatile uint8_t FatFsCnt = 0;
+volatile uint8_t Timer1, Timer2;
 
+void SDTimer_Handler(void)
+{
+  if(Timer1 > 0)
+    Timer1--;
+
+  if(Timer2 > 0)
+    Timer2--;
+}
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -60,6 +71,7 @@ extern DMA_HandleTypeDef hdma_spi1_rx;
 extern DMA_HandleTypeDef hdma_spi1_tx;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -185,7 +197,12 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+	FatFsCnt++;
+  if(FatFsCnt >= 10)
+  {
+    FatFsCnt = 0;
+    SDTimer_Handler();
+  }
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
@@ -256,7 +273,108 @@ void TIM1_UP_IRQHandler(void)
   /* USER CODE END TIM1_UP_IRQn 1 */
 }
 
+/**
+  * @brief This function handles TIM4 global interrupt.
+  */
+void TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+
+  /* USER CODE END TIM4_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_14);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	  if ( GPIO_Pin == GPIO_PIN_13)
+	      {
+	          // Write your code here
+	      	HAL_TIM_Base_Start_IT(&htim4);
+
+	      	pin_selected = 3;
+
+	      }
+	      if ( GPIO_Pin == GPIO_PIN_14)
+	          {
+	              // Write your code here
+
+	      	HAL_TIM_Base_Start_IT(&htim4);
+
+	      	pin_selected = 4;
+
+	  //   	 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	          }
+	      if ( GPIO_Pin == GPIO_PIN_15)
+	           {
+	               // Write your code here
+
+	       	HAL_TIM_Base_Start_IT(&htim4);
+
+	       	pin_selected = 5;
+
+	   //   	 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	           }
+
+}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(htim);
+
+  /* NOTE : This function should not be modified, when the callback is needed,
+            the HAL_TIM_PeriodElapsedCallback could be implemented in the user file
+   */
+  if(pin_selected == 3 ){
+  	if(HAL_GPIO_ReadPin(GPIOC, 8192) == GPIO_PIN_SET){
+//  		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_6);
+  		i -= 5;
+  		HAL_TIM_Base_Stop_IT(&htim4);
+  	}
+
+  	pin_selected = 0;
+    }
+    if(pin_selected == 4 ){
+  	if(HAL_GPIO_ReadPin(GPIOC, 16384) == GPIO_PIN_SET){
+
+  		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_2);
+
+  		HAL_TIM_Base_Stop_IT(&htim4);
+  	}
+
+  	pin_selected = 0;
+    }
+    if(pin_selected == 4 ){
+  	if(HAL_GPIO_ReadPin(GPIOC,  32768) == GPIO_PIN_SET){
+
+//  		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_7);
+
+  		HAL_TIM_Base_Stop_IT(&htim4);
+  	}
+
+  	pin_selected = 0;
+    }
+
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

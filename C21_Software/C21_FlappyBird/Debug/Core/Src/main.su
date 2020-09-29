@@ -1,0 +1,4 @@
+main.c:91:6:printRandoms	16	static
+main.c:395:6:SystemClock_Config	96	static
+main.c:106:5:main	616	static
+main.c:803:6:Error_Handler	0	static
