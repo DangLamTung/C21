@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -57,8 +56,6 @@ TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart2;
 
-PCD_HandleTypeDef hpcd_USB_FS;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -70,7 +67,6 @@ static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI2_Init(void);
-static void MX_USB_PCD_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM4_Init(void);
@@ -80,11 +76,11 @@ static void MX_TIM4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-FATFS fs ;
-FATFS  * pfs ;
-FIL fil ;
-FRESULT fres ;
-DWORD fre_clust ;
+//FATFS fs ;
+//FATFS  * pfs ;
+//FIL fil ;
+//FRESULT fres ;
+//DWORD fre_clust ;
 int i = 0;
 
 
@@ -129,10 +125,8 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
-  MX_FATFS_Init();
   MX_USART2_UART_Init();
   MX_SPI2_Init();
-  MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
   MX_TIM4_Init();
@@ -146,59 +140,59 @@ int main(void)
   uint16_t buffer_down[10][78];
   int j = 128;
 
-  fres = f_mount ( &fs ,  "" ,   1);
-   while ( fres !=  FR_OK ){
- 	  fres = f_mount ( &fs ,  "" ,   1);
- 	  HAL_Delay(100);
-   }
-  FIL file;
-      FRESULT res = f_open(&file, "rose.bmp", FA_READ);
-      if(res != FR_OK) {
-//          UART_Printf("f_open() failed, res = %d\r\n", res);
-          return -1;
-      }
-
-  unsigned int bytesRead;
-  uint8_t header[34];
-  res = f_read(&file, header, sizeof(header), &bytesRead);
-  if(res != FR_OK) {
-//      UART_Printf("f_read() failed, res = %d\r\n", res);
-//      f_close(&file);
-      return -2;
-  }
-
-//  if((header[0] != 137) || (header[1] != 80)) {
-////      UART_Printf("Wrong BMP signature: 0x%02X 0x%02X\r\n", header[0], header[1]);
+//  fres = f_mount ( &fs ,  "" ,   1);
+//   while ( fres !=  FR_OK ){
+// 	  fres = f_mount ( &fs ,  "" ,   1);
+// 	  HAL_Delay(100);
+//   }
+//  FIL file;
+//      FRESULT res = f_open(&file, "rose.bmp", FA_READ);
+//      if(res != FR_OK) {
+////          UART_Printf("f_open() failed, res = %d\r\n", res);
+//          return -1;
+//      }
+//
+//  unsigned int bytesRead;
+//  uint8_t header[34];
+//  res = f_read(&file, header, sizeof(header), &bytesRead);
+//  if(res != FR_OK) {
+////      UART_Printf("f_read() failed, res = %d\r\n", res);
 ////      f_close(&file);
-//      return -3;
+//      return -2;
+//  }
+//
+////  if((header[0] != 137) || (header[1] != 80)) {
+//////      UART_Printf("Wrong BMP signature: 0x%02X 0x%02X\r\n", header[0], header[1]);
+//////      f_close(&file);
+////      return -3;
+////  }
+//
+//  uint32_t imageOffset = header[10] | (header[11] << 8) | (header[12] << 16) | (header[13] << 24);
+//  uint32_t imageWidth = header[18] | (header[19] << 8) | (header[20] << 16) | (header[21] << 24);
+//  uint32_t imageHeight = header[22] | (header[23] << 8) | (header[24] << 16) | (header[25] << 24);
+//  uint16_t imagePlanes = header[26] | (header[27] << 8);
+//  uint16_t imageBitsPerPixel = header[28] | (header[29] << 8);
+//  uint32_t imageCompression = header[30] | (header[31] << 8) | (header[32] << 16) | (header[33] << 24);
+//
+//
+//  if((imageWidth != ST7735_WIDTH) || (imageHeight != ST7735_HEIGHT)) {
+////      UART_Printf("Wrong BMP size, %dx%d expected\r\n", ST7735_WIDTH, ST7735_HEIGHT);
+////      f_close(&file);
+////      return -4;
 //  }
 
-  uint32_t imageOffset = header[10] | (header[11] << 8) | (header[12] << 16) | (header[13] << 24);
-  uint32_t imageWidth = header[18] | (header[19] << 8) | (header[20] << 16) | (header[21] << 24);
-  uint32_t imageHeight = header[22] | (header[23] << 8) | (header[24] << 16) | (header[25] << 24);
-  uint16_t imagePlanes = header[26] | (header[27] << 8);
-  uint16_t imageBitsPerPixel = header[28] | (header[29] << 8);
-  uint32_t imageCompression = header[30] | (header[31] << 8) | (header[32] << 16) | (header[33] << 24);
-
-
-  if((imageWidth != ST7735_WIDTH) || (imageHeight != ST7735_HEIGHT)) {
-//      UART_Printf("Wrong BMP size, %dx%d expected\r\n", ST7735_WIDTH, ST7735_HEIGHT);
-//      f_close(&file);
-//      return -4;
-  }
-
-  if((imagePlanes != 1) || (imageBitsPerPixel != 24) || (imageCompression != 0)) {
-//      UART_Printf("Unsupported image format\r\n");
-//      f_close(&file);
-//      return -5;
-  }
-
-  res = f_lseek(&file, imageOffset);
-  if(res != FR_OK) {
-//      UART_Printf("f_lseek() failed, res = %d\r\n", res);
-//      f_close(&file);
-//      return -6;
-  }
+//  if((imagePlanes != 1) || (imageBitsPerPixel != 24) || (imageCompression != 0)) {
+////      UART_Printf("Unsupported image format\r\n");
+////      f_close(&file);
+////      return -5;
+//  }
+//
+//  res = f_lseek(&file, imageOffset);
+//  if(res != FR_OK) {
+////      UART_Printf("f_lseek() failed, res = %d\r\n", res);
+////      f_close(&file);
+////      return -6;
+//  }
 
 //  // row size is aligned to 4 bytes
 //  uint8_t imageRow[(ST7735_WIDTH * 3 + 3) & ~3];
@@ -220,7 +214,7 @@ int main(void)
 //      }
 //  }
 
-  res = f_close(&file);
+//  res = f_close(&file);
   int col_height = 30;
 
 
@@ -230,6 +224,8 @@ int main(void)
   col_pos[1] = 128;
   col_pos[2] = 128;
   uint8_t game_over = 0;
+  uint8_t at_the_end = 0;
+  uint8_t score = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -243,7 +239,7 @@ int main(void)
 	   uint16_t * ptr;
 	   uint16_t * ptr1;
 	   uint16_t * ptr2;
-
+	   ST7735_WriteString(0, 0, "Score:", Font_11x18, ST7735_GREEN, ST7735_BLACK);
 		  ptr = (uint16_t *) calloc(1280, sizeof(uint16_t));
 		  for(int a = 0; a < 10; a++){
 			  for(int b = 0; b < 128; b++){
@@ -333,11 +329,12 @@ int main(void)
     	  col_height = printRandoms(0, 100);
       }
 //      for(uint8_t check; check < 3; check ++){
-          if((col_pos[0] < 10) && (col_pos[10] > 0)){
+          if((col_pos[0] < 10) && (col_pos[0] > 0)){
         	  if( (col_array[0] < i) || (col_array[0] - 20 > i )){
         		  ST7735_DrawImage(0, 0, 128, 128, &ground);
         	      ST7735_DrawImage(50, 0, 33, 128, &over);
         	      game_over = 1;
+        	      at_the_end = 1;
         	  }
           }
 
@@ -401,7 +398,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -427,12 +423,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
@@ -694,37 +684,6 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
-  * @brief USB Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USB_PCD_Init(void)
-{
-
-  /* USER CODE BEGIN USB_Init 0 */
-
-  /* USER CODE END USB_Init 0 */
-
-  /* USER CODE BEGIN USB_Init 1 */
-
-  /* USER CODE END USB_Init 1 */
-  hpcd_USB_FS.Instance = USB;
-  hpcd_USB_FS.Init.dev_endpoints = 8;
-  hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
-  hpcd_USB_FS.Init.low_power_enable = DISABLE;
-  hpcd_USB_FS.Init.lpm_enable = DISABLE;
-  hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
-  if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USB_Init 2 */
-
-  /* USER CODE END USB_Init 2 */
 
 }
 
