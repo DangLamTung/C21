@@ -23,6 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+//#include "back_ground.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +39,9 @@ extern int i;
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+uint16_t coin_effect[2] = { 506, 379};
+uint16_t coin_effect_time[2] = { 1, 6};
+extern uint8_t sound, sound_on;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -56,6 +59,7 @@ extern int i;
 volatile uint8_t FatFsCnt = 0;
 volatile uint8_t Timer1, Timer2;
 
+
 void SDTimer_Handler(void)
 {
   if(Timer1 > 0)
@@ -71,9 +75,10 @@ extern DMA_HandleTypeDef hdma_spi1_rx;
 extern DMA_HandleTypeDef hdma_spi1_tx;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN EV */
-
+extern TIM_HandleTypeDef htim2;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -274,6 +279,36 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM3 global interrupt.
+  */
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+  if(sound_on == 1){
+ 	 if(sound < 1){
+ 		 __HAL_TIM_SET_AUTORELOAD(&htim2,coin_effect[0]);
+ 		 sound++;
+ 	 }
+ 	 else{
+ 	 if(sound < 4){
+ 		 __HAL_TIM_SET_AUTORELOAD(&htim2,coin_effect[1]);
+ 	 }
+ 	 sound++;
+ 	 }
+ 	 if(sound > 4){
+ 		 sound_on = 0;
+ 		 sound = 0;
+ 		 __HAL_TIM_SET_AUTORELOAD(&htim2,0);
+ 	 }
+  }
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM4 global interrupt.
   */
 void TIM4_IRQHandler(void)
@@ -337,44 +372,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	           }
 
 }
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  /* Prevent unused argument(s) compilation warning */
-  UNUSED(htim);
 
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_TIM_PeriodElapsedCallback could be implemented in the user file
-   */
-  if(pin_selected == 3 ){
-  	if(HAL_GPIO_ReadPin(GPIOC, 8192) == GPIO_PIN_SET){
-//  		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_6);
-  		i -= 5;
-  		HAL_TIM_Base_Stop_IT(&htim4);
-  	}
-
-  	pin_selected = 0;
-    }
-    if(pin_selected == 4 ){
-  	if(HAL_GPIO_ReadPin(GPIOC, 16384) == GPIO_PIN_SET){
-
-  		HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_2);
-
-  		HAL_TIM_Base_Stop_IT(&htim4);
-  	}
-
-  	pin_selected = 0;
-    }
-    if(pin_selected == 4 ){
-  	if(HAL_GPIO_ReadPin(GPIOC,  32768) == GPIO_PIN_SET){
-
-//  		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_7);
-
-  		HAL_TIM_Base_Stop_IT(&htim4);
-  	}
-
-  	pin_selected = 0;
-    }
-
-}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -42,7 +42,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+uint16_t buffer[15][15];
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

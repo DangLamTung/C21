@@ -46,8 +46,8 @@ C21_FlappyBird.bin \
 all: C21_FlappyBird.elf secondary-outputs
 
 # Tool invocations
-C21_FlappyBird.elf: $(OBJS) $(USER_OBJS) C:\Users\Admin\STM32CubeIDE\workspace_1.4.0\C21_FlappyBird\STM32F103C8TX_FLASH.ld
-	arm-none-eabi-gcc -o "C21_FlappyBird.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Admin\STM32CubeIDE\workspace_1.4.0\C21_FlappyBird\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="C21_FlappyBird.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+C21_FlappyBird.elf: $(OBJS) $(USER_OBJS) C:\Users\UAD81HC\Documents\GitHub\C21\C21_Software\C21_FlappyBird\STM32F103C8TX_FLASH.ld
+	arm-none-eabi-gcc -o "C21_FlappyBird.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\UAD81HC\Documents\GitHub\C21\C21_Software\C21_FlappyBird\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="C21_FlappyBird.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
