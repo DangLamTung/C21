@@ -339,7 +339,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "C21_board.step",
       "vmrl": ""
     },
     "page_layout_descr_file": ""
