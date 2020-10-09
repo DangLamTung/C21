@@ -56,8 +56,6 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
-UART_HandleTypeDef huart2;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -67,7 +65,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
@@ -189,7 +186,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
-  MX_USART2_UART_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
@@ -428,7 +424,7 @@ int main(void)
           }
 
           if((col_pos[1] < 15) && (col_pos[1] > 0)){
-        	  if( (col_array[1] > i) || ((col_array[1]+10) < i )){
+        	  if( (col_array[1] > i) || ((col_array[1]+15) < i )){
              		 ST7735_DrawImage(0, 0, 128, 128, &ground);
              	     ST7735_DrawImage(50, 0, 33, 128, &over);
              	    game_over = 1;
@@ -438,7 +434,7 @@ int main(void)
                }
 
           if((col_pos[2] < 15) && (col_pos[2] > 0)){
-                  	  if( (col_array[2] > i) || ((col_array[2]+10) < i )){
+                  	  if( (col_array[2] > i) || ((col_array[2]+15) < i )){
              		 ST7735_DrawImage(0, 0, 128, 128, &ground);
              	     ST7735_DrawImage(50, 0, 33, 128, &over);
              	    game_over = 1;
@@ -451,17 +447,17 @@ int main(void)
 //	  ST7735_DrawImage(i, 0, 15, 15, &bird);
 
 	  ST7735_FillRectangle(0, col_pos[0], col_array[0] , 10, ST7735_GREEN);
-	  ST7735_FillRectangle(col_array[0] + 20,col_pos[0], 88 - col_array[0] , 10, ST7735_GREEN);
+	  ST7735_FillRectangle(col_array[0] + 25,col_pos[0], 88 - col_array[0] , 10, ST7735_GREEN);
 
 
 	  if(col_pos[1] < 128){
 		  ST7735_FillRectangle(0, col_pos[1], col_array[1] , 10, ST7735_GREEN);
-		  ST7735_FillRectangle(col_array[1] + 20,col_pos[1], 88 - col_array[1] , 10, ST7735_GREEN);
+		  ST7735_FillRectangle(col_array[1] + 25,col_pos[1], 88 - col_array[1] , 10, ST7735_GREEN);
 	  }
 
 	  if(col_pos[2] < 128){
 	 		  ST7735_FillRectangle(0, col_pos[2], col_array[2] , 10, ST7735_GREEN);
-	 		  ST7735_FillRectangle(col_array[2] + 20,col_pos[2], 88 - col_array[2] , 10, ST7735_GREEN);
+	 		  ST7735_FillRectangle(col_array[2] + 25,col_pos[2], 88 - col_array[2] , 10, ST7735_GREEN);
 	 	  }
 
 //	  ST7735_FillRectangle(0, j, col_height , 10, ST7735_GREEN);
@@ -794,39 +790,6 @@ static void MX_TIM4_Init(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -875,6 +838,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PA0 PA3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PB1 PB10 SD_CS_Pin */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_10|SD_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -890,6 +859,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
