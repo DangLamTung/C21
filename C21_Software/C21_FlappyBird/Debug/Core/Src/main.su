@@ -1,7 +1,8 @@
 main.c:87:6:printRandoms	16	static
 main.c:97:6:print_score	16	static
-main.c:132:6:draw_bird	488	static
-main.c:487:6:SystemClock_Config	72	static
-main.c:163:5:main	128	static
-main.c:874:6:HAL_TIM_PeriodElapsedCallback	32	static
-main.c:937:6:Error_Handler	0	static
+main.c:131:6:print_score_10	0	static
+main.c:137:6:draw_bird	488	static
+main.c:510:6:SystemClock_Config	72	static
+main.c:168:5:main	128	static
+main.c:897:6:HAL_TIM_PeriodElapsedCallback	32	static
+main.c:960:6:Error_Handler	0	static

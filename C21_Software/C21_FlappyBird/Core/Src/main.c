@@ -94,41 +94,46 @@ int  printRandoms(int lower, int upper)
 int col_array[3];
 int col_pos[3];
 
-void print_score(uint8_t score){
+void print_score(uint8_t score, uint8_t pos){
 	switch(score){
 	case 0:
-		ST7735_DrawImage(10, 58, 8, 8, &zero);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &zero);
 	break;
 	case 1:
-		ST7735_DrawImage(10, 58, 8, 8, &one);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &one);
 	break;
 	case 2:
-		ST7735_DrawImage(10, 58, 8, 8, &two);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &two);
 	break;
 	case 3:
-		ST7735_DrawImage(10, 58, 8, 8, &three);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &three);
 	break;
 	case 4:
-		ST7735_DrawImage(10, 58, 8, 8, &four);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &four);
 	break;
 	case 5:
-		ST7735_DrawImage(10, 58, 8, 8, &five);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &five);
 	break;
 	case 6:
-		ST7735_DrawImage(10, 58, 8, 8, &six);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &six);
 	break;
 	case 7:
-		ST7735_DrawImage(10,58, 8, 8, &seven);
+		ST7735_DrawImage(10,58 + pos, 8, 8, &seven);
 	break;
 	case 8:
-		ST7735_DrawImage(10, 58, 8, 8, &eight);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &eight);
 	break;
 	case 9:
-		ST7735_DrawImage(10, 58, 8, 8, &nine);
+		ST7735_DrawImage(10, 58 + pos, 8, 8, &nine);
 	break;
 	}
 }
+void print_score_10(uint8_t score){
+	if(score > 10){
 
+	}
+
+}
 void draw_bird(uint16_t x, uint16_t y, const uint16_t* bird){
 	uint16_t buffer[15][15];
 	if(x<128){
@@ -192,6 +197,9 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim3);
+//  HAL_Delay(300);
+
   ST7735_Init();
 
   ST7735_DrawImage(0, 0, 128, 128, &ground);
@@ -276,6 +284,16 @@ int main(void)
 //  res = f_close(&file);
   int col_height = 30;
 
+  int  stime;
+   long ltime;
+
+   /* get the current calendar time */
+   uint32_t seed;
+
+
+//   seed = seed + 271828192;
+//   seed = seed * 314159;
+   srand(seed);
 
   col_array[0] = printRandoms(30, 100);
   col_array[1] = printRandoms(30, 100);
@@ -336,7 +354,7 @@ int main(void)
 
 
       if(i < 108){
-    	  i+=2;
+    	  i+=3;
       }
       else{
     	  ST7735_DrawImage(50, 0, 33, 128, &over);
@@ -414,7 +432,7 @@ int main(void)
       }
 //      for(uint8_t check; check < 3; check ++){
           if((col_pos[0] < 15) && (col_pos[0] > 0)){
-        	  if( (col_array[0] > i) || ((col_array[0]+10) < i )){
+        	  if( ((col_array[0] - 5) > i) || ((col_array[0]+10) < i )){
         		  ST7735_DrawImage(0, 0, 128, 128, &ground);
         	      ST7735_DrawImage(50, 0, 33, 128, &over);
         	      game_over = 1;
@@ -424,7 +442,7 @@ int main(void)
           }
 
           if((col_pos[1] < 15) && (col_pos[1] > 0)){
-        	  if( (col_array[1] > i) || ((col_array[1]+15) < i )){
+        	  if( ((col_array[1] -5) > i) || ((col_array[1]+15) < i )){
              		 ST7735_DrawImage(0, 0, 128, 128, &ground);
              	     ST7735_DrawImage(50, 0, 33, 128, &over);
              	    game_over = 1;
@@ -434,7 +452,7 @@ int main(void)
                }
 
           if((col_pos[2] < 15) && (col_pos[2] > 0)){
-                  	  if( (col_array[2] > i) || ((col_array[2]+15) < i )){
+                  	  if( ((col_array[2] -5) > i) || ((col_array[2]+15) < i )){
              		 ST7735_DrawImage(0, 0, 128, 128, &ground);
              	     ST7735_DrawImage(50, 0, 33, 128, &over);
              	    game_over = 1;
@@ -468,8 +486,13 @@ int main(void)
 	  ST7735_DrawImage(0, col_pos[0], 128, 10, ptr);
 	  ST7735_DrawImage(0, col_pos[1], 128, 10, ptr1);
 	  ST7735_DrawImage(0, col_pos[2], 128, 10, ptr2);
-
-	  print_score(score);
+      if(score < 10){
+	  print_score(score,0);
+      }
+      else{
+    	  print_score(score%10,0);
+    	  print_score(score/10,8);
+      }
 //	  ST7735_DrawImage(50, j, 78, 10, ptr1);
 	  free(ptr);
 	  free(ptr1);

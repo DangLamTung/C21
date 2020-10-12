@@ -42,26 +42,26 @@ class ChartData(APIView):
     
     def get(self, request, format = None): 
 
-        cur = conn.cursor()
-        cur.execute("SELECT user FROM auth_user")
-        labels = cur.fetchall()
+        # cur = conn.cursor()
+        # cur.execute("SELECT user FROM auth_user")
+        # labels = cur.fetchall()
         
-        cur.execute("SELECT user FROM auth_user")
-        labels = cur.fetchall()
-        # labels = [ 
-        #     'January', 
-        #     'February',  
-        #     'March',  
-        #     'April',  
-        #     'May',  
-        #     'June',  
-        #     'July'
-        #     ] 
-        # chartLabel = "my data"
-        # chartdata = [0, 10, 5, 2, 20, 30, 45] 
-        # data ={ 
-        #              "labels":labels, 
-        #              "chartLabel":chartLabel, 
-        #              "chartdata":chartdata, 
-        #      } 
+        # cur.execute("SELECT user FROM auth_user")
+        # labels = cur.fetchall()
+        labels = [ 
+            'January', 
+            'February',  
+            'March',  
+            'April',  
+            'May',  
+            'June',  
+            'July'
+            ] 
+        chartLabel = "my data"
+        chartdata = [0, 10, 5, 2, 20, 30, 45] 
+        data ={ 
+                     "labels":labels, 
+                     "chartLabel":chartLabel, 
+                     "chartdata":chartdata, 
+             } 
         return Response(data) 
