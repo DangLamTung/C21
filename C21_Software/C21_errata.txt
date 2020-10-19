@@ -1,8 +1,0 @@
-C21 board bug list:
-
-* Usage of 0603 capacitor and resistor 
-* Lack of RST pin for the LCD work around: connect 3.3v to the RST pin, but cannot reset the LCD
-* Reverse of MPU9250, this is not important, but can make the board not attractive
-* MPU9250 I2C seem to be affected by I2C busy bug of STM32, work around by software is failed
-* nRF24 is not connected, maybe this is due to hardware bug
-
