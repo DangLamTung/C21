@@ -1,13 +1,13 @@
 from django.db import models
 from quiz.models import Question
-
+from django.core.files.storage import FileSystemStorage
 ANSWER_ORDER_OPTIONS = (
     ('content', 'Content'),
     ('none', 'None'),
     # ('random', 'Random')
 )
 
-
+fs = FileSystemStorage(location='/media/photos')
 class MCQQuestion(Question):
 
     answer_order = models.CharField(

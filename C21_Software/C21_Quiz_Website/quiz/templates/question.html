@@ -56,7 +56,10 @@
 <p class="lead">{{ question.content }}</p>
 
 {% if question.figure %}
-    <img src="{{ question.figure.url }}" alt="{{ question.content }}" />
+{% load static %}
+<img src="http://127.0.0.1:8000/media/gallery/Capture1.png" alt="My image"/>
+
+    <!-- <img src="{{ question.figure.url }}" width="100" height="80" alt="" /> -->
 {% endif %}
 
 <form action="" method="POST">{% csrf_token %}

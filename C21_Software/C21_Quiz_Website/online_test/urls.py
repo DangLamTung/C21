@@ -16,10 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from visualize import views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('quiz.urls')),
     path('visual', views.HomeView.as_view()), 
     path('api', views.ChartData.as_view()), 
+    path('gallery/', include('gallery.urls', namespace='gallery')),
+    # path('', RedirectView.as_view(url='gallery')),
 ]
+from django.conf import settings
+from django.conf.urls.static import static
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

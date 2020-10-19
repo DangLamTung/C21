@@ -43,10 +43,10 @@ class ChartData(APIView):
     def get(self, request, format = None): 
         conn = sqlite3.connect('db.sqlite3')
         cur = conn.cursor()
-        cur.execute("SELECT username FROM auth_user")
+        cur.execute("SELECT username FROM auth_user order by auth_user.id")
         labels = cur.fetchall()
 
-        cur.execute("SELECT id FROM auth_user")
+        cur.execute("SELECT id FROM auth_user order by auth_user.id")
         user_id_bug = cur.fetchall()
 
         cur.execute("SELECT user_id FROM quiz_progress")

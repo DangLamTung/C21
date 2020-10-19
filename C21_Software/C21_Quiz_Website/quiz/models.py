@@ -15,6 +15,10 @@ from .validators import csv_file_validator
 from django.contrib.auth.models import User
 from django.contrib import messages
 
+from django.core.files.storage import FileSystemStorage
+
+fs = FileSystemStorage(location='/media/photos')
+
 
 class CategoryManager(models.Manager):
 
@@ -525,10 +529,7 @@ class Question(models.Model):
                                  blank=True,
                                  null=True, on_delete=models.CASCADE)
 
-    figure = models.ImageField(upload_to='uploads/%Y/%m/%d',
-                               blank=True,
-                               null=True,
-                               verbose_name=_("Figure"))
+    figure = models.ImageField(upload_to='gallery')
 
     content = models.CharField(max_length=1000,
                                blank=False,
