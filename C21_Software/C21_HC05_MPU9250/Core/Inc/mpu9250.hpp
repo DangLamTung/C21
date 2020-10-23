@@ -383,7 +383,7 @@ IMU_data process_MPU(uint8_t EKF, uint8_t LPF){
 	}
 
 	Acc_x = (int16_t)(data[0] << 8 | data[1]);
-	Acc_x= (int16_t)(data[2] << 8 | data[3]);
+	Acc_y= (int16_t)(data[2] << 8 | data[3]);
 	Acc_z = (int16_t)(data[4] << 8 | data[5]);
 
     temp = (int16_t)(data[6] << 8 | data[7]);
