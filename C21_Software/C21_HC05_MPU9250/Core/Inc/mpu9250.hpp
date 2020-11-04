@@ -397,7 +397,7 @@ IMU_data process_MPU(uint8_t EKF, uint8_t LPF){
 	Acc_z = (Acc_z)/16384.0 + bAz;
     if(!EKF){
 	Gyro_x = (Gyro_x )/16.4- bGx;
-	Gyro_y = (Gyro_y )/16.4- bGy;
+	Gyro_y = (Gyro_y)/16.4- bGy;
 	Gyro_z = (Gyro_z )/16.4- bGz;
     }
     else{
@@ -584,7 +584,7 @@ IMU_calib_data calibration_IMU(){
      bAy /= 200;
      bAz /= 200;
      g = sqrt(bAx*bAx + bAy*bAy + bAz*bAz);
-     bAz = -1 - bAz;
+     bAz = 1 - bAz;
      bGx /= 200;
      bGy /= 200;
      bGz /= 200;
