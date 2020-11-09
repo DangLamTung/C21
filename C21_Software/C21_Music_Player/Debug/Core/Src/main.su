@@ -1,3 +1,5 @@
-main.c:320:6:SystemClock_Config	96	static
-main.c:126:5:main	168	static,ignoring_inline_asm
-main.c:686:6:Error_Handler	0	static
+main.c:124:9:play_music	104	static,ignoring_inline_asm
+main.c:291:6:SystemClock_Config	96	static
+main.c:167:5:main	168	static,ignoring_inline_asm
+main.c:655:6:HAL_GPIO_EXTI_Callback	0	static
+main.c:701:6:Error_Handler	0	static

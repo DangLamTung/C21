@@ -60,7 +60,7 @@
       36,
       37
     ],
-    "visible_layers": "7ffff_7ffffffe"
+    "visible_layers": "7ffff_ffffffff"
   },
   "meta": {
     "filename": "C21_board.kicad_prl",

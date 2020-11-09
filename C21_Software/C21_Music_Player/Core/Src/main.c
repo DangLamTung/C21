@@ -117,6 +117,47 @@ uint32_t total , free ;
 char buffer [ 100 ] ;
 uint32_t counter = 0;
 
+volatile uint8_t notes = 0;
+volatile uint8_t playing_notes = 0;
+
+
+uint8_t play_music(uint8_t playing){
+	   FIL file;
+	   FRESULT res = f_open(&file, "e1.wav", FA_READ);
+	   uint32_t bytesRead;
+	   if(res != FR_OK) {
+	 //      UART_Printf("f_open() failed, res = %d\r\n", res);
+	       return 1;
+	   }
+
+	   uint8_t header[44];
+	   res = f_read(&file, header, sizeof(header), &bytesRead);
+	      if(res != FR_OK) {
+	//          UART_Printf("f_read() failed, res = %d\r\n", res);
+	          f_close(&file);
+	          return 2;
+	      }
+	      while(f_eof (&file) == 0){
+	      uint8_t data[1];
+	      res = f_read(&file, data, sizeof(data), &bytesRead);
+	            if(res != FR_OK) {
+	      //          UART_Printf("f_read() failed, res = %d\r\n", res);
+	                f_close(&file);
+	                return 2;
+	            }
+
+	   //         uint16_t pwm = (uint16_t) sound;
+
+	            __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 255 - data[0]);
+	            __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 255 - data[0]);
+	            for(int a = 0; a <400; a++){
+	                asm("NOP");
+	            }
+
+	      }
+	         res = f_close(&file);
+	     return 0;
+}
 /* USER CODE END 0 */
 
 /**
@@ -163,136 +204,15 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_4);
   __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 10000);
 //
-//  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
-//  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 800);
-//
   fres = f_mount ( &fs ,  "" ,   1);
    while ( fres !=  FR_OK ){
  	  fres = f_mount ( &fs ,  "" ,   1);
  	  HAL_Delay(100);
    }
- //  HAL_Delay(100);
-   /* Open file to write */
- //
- //
 
-   /* Check free space */
- //  DWORD free_clusters, free_sectors, total_sectors;
- //
- //  FATFS* getFreeFs;
- //  fres = f_getfree("", &free_clusters, &getFreeFs);
-
-
- //  fres = f_open(&fil, "first.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
- //     if(fres == FR_OK) {
- //    	 HAL_UART_Transmit(&huart2,"I was able to open 'first.txt' for writing\r\n",100 ,100);
- //     } else {
- //
- //     }
- //     char WriteBuffer [30]= "a new file is made!";
- //     //Copy in a string
- //     UINT bytesWrote;
- //     fres = f_write(&fil, &WriteBuffer, 30, &bytesWrote);
- //     if(fres == FR_OK) {
- ////      	myprintf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
- //     } else {
- ////   	myprintf("f_write error (%i)\r\n");
- //     }
- //
- //     //Be a tidy kiwi - don't forget to close your file!
- //     f_close(&fil);
- //
- //
- // fres = f_open(&fil, "first.txt", FA_READ);
- //    if (fres != FR_OK) {
- ////      myprintf("f_open error (%i)\r\n");
- //      while(1);
- //    }
- ////    myprintf("I was able to open 'test.txt' for reading!\r\n");
- //
- //    BYTE readBuf[30];
- //
- //    //We can either use f_read OR f_gets to get data out of files
- //    //f_gets is a wrapper on f_read that does some string formatting for us
- //    TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
- //    if(rres != 0) {
- ////      myprintf("Read string from 'test.txt' contents: %s\r\n", readBuf);
- //    } else {
- ////      myprintf("f_gets error (%i)\r\n", fres);
- //    }
-
-     //Close file, don't forget this!
- //    f_close(&fil);
- //  total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
- //  free_sectors = free_clusters * getFreeFs->csize;
    ST7735_Init();
 //   ST7735_FillScreen(0xFFE0);
-   FIL file;
-   FRESULT res = f_open(&file, "trungthu.wav", FA_READ);
-   uint32_t bytesRead;
-   if(res != FR_OK) {
- //      UART_Printf("f_open() failed, res = %d\r\n", res);
-       return -1;
-   }
 
-   uint8_t header[44];
-      res = f_read(&file, header, sizeof(header), &bytesRead);
-      if(res != FR_OK) {
-//          UART_Printf("f_read() failed, res = %d\r\n", res);
-          f_close(&file);
-          return -2;
-      }
-//   uint32_t data_size = (uint32_t) (header[8]<<24) |( header[7]<<16) |( header[6]<<8)|(header[5]);
-//   uint32_t sample_rate = (uint32_t) (header[27]<<24) |( header[26]<<16) |( header[25]<<8)|(header[24]);
-//   uint32_t bit_rate = (uint32_t) (header[32]<<24) |( header[31]<<16) |( header[30]<<8)|(header[29]);
-// uint32_t imageHeight = 128;
-// uint32_t imageWidth = 128;
-//
-// uint16_t image[4096];
-// for( int frame = 0;  frame < 903; frame ++){
-//   uint8_t imageRow[256];
-//      for(uint32_t y = 0; y < 32; y++) {
-//          uint32_t rowIdx = 0;
-//          res = f_read(&file, imageRow, sizeof(imageRow), &bytesRead);
-//          if(res != FR_OK) {
-// //             UART_Printf("f_read() failed, res = %d\r\n", res);
-//              f_close(&file);
-//              return -7;
-//          }
-//
-//          for(uint32_t x = 0; x < imageWidth; x++) {
-//              uint8_t h = imageRow[rowIdx++];
-//              uint8_t l = imageRow[rowIdx++];
-//
-//              image[y*128 + x ] = (h<<8)|l;
-//
-// //             ST7735_DrawPixel(x,  y - 1 , (l<<8)|h);
-//          }
-//      }
-//
-      ST7735_DrawImage(0, 0, 128, 128, &doge);
-// //
-// //     ST7735_DrawPixel(x,  y - 1 , color565);
-// }
-   while(f_eof (&file) == 0){
-   uint8_t data[1];
-   res = f_read(&file, data, sizeof(data), &bytesRead);
-         if(res != FR_OK) {
-   //          UART_Printf("f_read() failed, res = %d\r\n", res);
-             f_close(&file);
-             return -2;
-         }
-
-//         uint16_t pwm = (uint16_t) sound;
-
-         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 255 - data[0]);
-         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 255 - data[0]);
-         for(int a = 0; a <400; a++){
-             asm("NOP");
-         }
-
-   }
-      res = f_close(&file);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -302,16 +222,67 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  for(int i = 0; i< 256; i++){
-//		  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, sin_table[i]);
-		  for(int j = 0; j<2;j++){
+//	  play_music();
 
-		  }
-	  }
+
+	   FIL file;
+	   FRESULT res;
+	   if(notes == 1){
+	     res = f_open(&file, "e1.wav", FA_READ);
+	     playing_notes = 1;
+	   }
+	   if(notes == 2){
+	  			  res = f_open(&file, "f1.wav", FA_READ);
+	  			  playing_notes = 2;
+	  		   }
+	   uint32_t bytesRead;
+	   if(notes != 0){
+	   if(res != FR_OK) {
+	 //      UART_Printf("f_open() failed, res = %d\r\n", res);
+	       return 1;
+	   }
+
+	   uint8_t header[44];
+	   res = f_read(&file, header, sizeof(header), &bytesRead);
+	      if(res != FR_OK) {
+	//          UART_Printf("f_read() failed, res = %d\r\n", res);
+	          f_close(&file);
+	          return 2;
+	      }
+
+
+
+	      while(f_eof (&file) == 0){
+	    	  if(playing_notes == 0){
+	    		  break;
+	    	  }
+	      uint8_t data[1];
+	      res = f_read(&file, data, sizeof(data), &bytesRead);
+	            if(res != FR_OK) {
+	      //          UART_Printf("f_read() failed, res = %d\r\n", res);
+	                f_close(&file);
+	                return 2;
+	            }
+
+	   //         uint16_t pwm = (uint16_t) sound;
+
+	            __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 255 - data[0]);
+	            __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 255 - data[0]);
+	            for(int a = 0; a <400; a++){
+	                asm("NOP");
+	            }
+
+	      }
+	      notes = 0;
+	      playing_notes = 0;
+	      f_close(&file);
+	   }
+  }
 
   }
+
   /* USER CODE END 3 */
-}
+
 
 /**
   * @brief System Clock Configuration
@@ -651,8 +622,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10|SD_CS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  /*Configure GPIO pins : PC13 PC14 PC15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -673,9 +644,53 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	  if ( GPIO_Pin == GPIO_PIN_13)
+	      {
+	          // Write your code here
+//	      	HAL_TIM_Base_Start_IT(&htim4);
+
+                notes = 1;
+                if(playing_notes != 0){
+                	playing_notes = 0;
+                }
+
+	      }
+	      if ( GPIO_Pin == GPIO_PIN_14)
+	          {
+	              // Write your code here
+
+//	      	HAL_TIM_Base_Start_IT(&htim4);
+
+	    	  notes = 1;
+	    	    if(playing_notes != 0){
+	    	           playing_notes = 0;
+	    	        }
+	  //   	 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	          }
+	      if ( GPIO_Pin == GPIO_PIN_15)
+	           {
+	               // Write your code here
+
+//	       	HAL_TIM_Base_Start_IT(&htim4);
+
+	    	  notes = 2;
+	    	    if(playing_notes != 0){
+	    	                	playing_notes = 0;
+	    	                }
+	   //   	 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+	           }
+
+}
 
 /* USER CODE END 4 */
 
